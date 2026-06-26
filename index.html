@@ -2,547 +2,962 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>郑州 · 微短剧之夜 | 传媒新势力</title>
-    <!-- 使用无外部依赖，纯CSS+JS，字体用系统默认提升性能 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+    <title>当AI走进校园 · 郑州北大学城数据版</title>
     <style>
-        /* 全局重置与基础设置 */
+        :root {
+            --black: #0a0a0a;
+            --white: #ffffff;
+            --gray-50: #f5f5f5;
+            --gray-100: #e5e5e5;
+            --gray-200: #cccccc;
+            --gray-400: #888888;
+            --gray-600: #555555;
+            --red: #e60012;
+            --red-bg: #ffe5e7;
+            --font-stack: 'Helvetica Neue', 'Helvetica', 'Arial', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: #0b0a0f;
-            color: #f0edf5;
-            line-height: 1.5;
-            overflow-x: hidden;
+        body,
+        html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: var(--font-stack);
+            background: var(--black);
+            -webkit-font-smoothing: antialiased;
+            touch-action: pan-y;
         }
-
-        /* 主容器，使用渐变暗夜剧场感 */
-        .site-wrapper {
-            max-width: 1200px;
+        .h5-container {
+            width: 100%;
+            height: 100%;
+            max-width: 500px;
             margin: 0 auto;
-            padding: 0 20px;
             position: relative;
+            overflow: hidden;
+            background: var(--white);
+            box-shadow: 0 0 0 2px var(--black);
         }
-
-        /* 星空闪烁背景 (纯CSS) */
-        body::before {
-            content: '';
-            position: fixed;
+        @media (min-width: 501px) {
+            .h5-container {
+                border-left: 2px solid var(--black);
+                border-right: 2px solid var(--black);
+                height: 92vh;
+                max-height: 900px;
+                margin-top: 2vh;
+            }
+        }
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+        .screens-stack {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        .screen {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            padding: 0 24px;
+            scrollbar-width: none;
+            background: var(--white);
+            visibility: hidden;
+            pointer-events: none;
+            will-change: transform, opacity;
+            transition: transform 0.45s cubic-bezier(0.2, 0.6, 0.35, 1), opacity 0.45s cubic-bezier(0.2, 0.6, 0.35, 1), visibility 0s 0.45s;
+        }
+        .screen.active {
+            visibility: visible;
+            pointer-events: auto;
+            transition: transform 0.45s cubic-bezier(0.2, 0.6, 0.35, 1), opacity 0.45s cubic-bezier(0.2, 0.6, 0.35, 1), visibility 0s 0s;
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        .screen::-webkit-scrollbar {
+            display: none;
+        }
+        .screen.enter-forward {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .screen.leave-forward {
+            transform: translateY(-30%) scale(0.95);
+            opacity: 0;
+        }
+        .screen.enter-backward {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        .screen.leave-backward {
+            transform: translateY(30%) scale(0.95);
+            opacity: 0;
+        }
+        .particle-canvas {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                radial-gradient(1px 1px at 10% 20%, rgba(255, 215, 0, 0.3), transparent),
-                radial-gradient(1px 1px at 30% 60%, rgba(255, 200, 100, 0.2), transparent),
-                radial-gradient(1.5px 1.5px at 50% 10%, rgba(255, 255, 255, 0.4), transparent),
-                radial-gradient(1px 1px at 70% 40%, rgba(255, 215, 0, 0.25), transparent),
-                radial-gradient(1px 1px at 90% 80%, rgba(200, 180, 255, 0.3), transparent),
-                radial-gradient(1.5px 1.5px at 20% 90%, #ffd96655, transparent),
-                radial-gradient(1px 1px at 80% 15%, #ffb34755, transparent);
-            background-size: 200% 200%;
             pointer-events: none;
-            z-index: 0;
-            animation: starFloat 60s infinite alternate ease-in-out;
-        }
-
-        @keyframes starFloat {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 100%; }
-        }
-
-        /* 内容区在z-index上层 */
-        .content {
-            position: relative;
             z-index: 2;
-            padding: 40px 0 30px;
         }
-
-        /* 头部标题区 */
-        .hero {
-            text-align: center;
-            padding: 60px 20px 40px;
-            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        .hero::after {
-            content: '🎬';
+        /* 封面 */
+        .cover-top-bar {
             position: absolute;
-            right: 20px;
-            top: 20px;
-            font-size: 3rem;
-            opacity: 0.15;
-            transform: rotate(10deg);
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--black);
+            z-index: 5;
+            animation: topBarPulse 2s infinite;
         }
-
-        .hero h1 {
-            font-size: clamp(2.8rem, 12vw, 5.5rem);
+        @keyframes topBarPulse {
+            0%,
+            100% {
+                height: 4px;
+            }
+            50% {
+                height: 8px;
+            }
+        }
+        .cover-top-strip {
+            position: absolute;
+            top: 4px;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--red);
+            z-index: 5;
+            opacity: 0.6;
+        }
+        .scan-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--red);
+            opacity: 0.12;
+            z-index: 4;
+            animation: scanDown 4s linear infinite;
+        }
+        .scan-line:nth-child(2) {
+            animation-delay: 2s;
+            opacity: 0.06;
+        }
+        @keyframes scanDown {
+            0% {
+                top: -2px;
+            }
+            100% {
+                top: 105%;
+            }
+        }
+        .cover-geo-large {
+            position: absolute;
+            right: -20px;
+            top: 10%;
+            width: 120px;
+            height: 120px;
+            border: 4px solid var(--black);
+            z-index: 1;
+            transform: rotate(15deg);
+            animation: geoLargeFloat 6s infinite;
+        }
+        @keyframes geoLargeFloat {
+            0%,
+            100% {
+                transform: rotate(15deg) translateY(0);
+            }
+            50% {
+                transform: rotate(18deg) translateY(-14px);
+            }
+        }
+        .cover-geo-small {
+            position: absolute;
+            right: 40px;
+            top: 22%;
+            width: 48px;
+            height: 48px;
+            background: var(--red);
+            border: 3px solid var(--black);
+            z-index: 1;
+            animation: geoSmallPulse 3s infinite;
+        }
+        @keyframes geoSmallPulse {
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(8deg);
+            }
+        }
+        .cover-diamond {
+            position: absolute;
+            left: -10px;
+            top: 18%;
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--black);
+            background: var(--white);
+            transform: rotate(45deg);
+            z-index: 1;
+            animation: diamondFloat 4s infinite;
+        }
+        @keyframes diamondFloat {
+            0%,
+            100% {
+                transform: rotate(45deg) translateY(0);
+            }
+            50% {
+                transform: rotate(48deg) translateY(-16px);
+            }
+        }
+        .cover-rings {
+            position: absolute;
+            left: 20px;
+            top: 28%;
+            z-index: 1;
+        }
+        .cover-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid var(--black);
+            animation: ringPulse 3s infinite;
+        }
+        .cover-ring:nth-child(1) {
+            width: 40px;
+            height: 40px;
+        }
+        .cover-ring:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            left: -10px;
+            top: -10px;
+            border-color: var(--red);
+            animation-delay: 0.8s;
+        }
+        @keyframes ringPulse {
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.08);
+            }
+        }
+        .cover-dot-matrix {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            z-index: 1;
+            opacity: 0.45;
+        }
+        .cover-dot-matrix span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--black);
+            animation: dotBlink 2s infinite;
+        }
+        .cover-dot-matrix span:nth-child(odd) {
+            background: var(--red);
+            animation-delay: 0.6s;
+        }
+        @keyframes dotBlink {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        .cover-bottom-info {
+            position: absolute;
+            bottom: 30px;
+            left: 24px;
+            right: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            z-index: 5;
+            border-top: 2px solid var(--black);
+            padding-top: 12px;
+        }
+        .cover-bottom-info span {
+            font-size: 0.6rem;
             font-weight: 700;
-            letter-spacing: 6px;
-            background: linear-gradient(135deg, #f9e285 0%, #f5b342 60%, #ff8c42 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 30px rgba(255, 200, 50, 0.2);
-            margin-bottom: 12px;
-            word-break: break-word;
+            letter-spacing: 0.1em;
+            color: var(--gray-600);
         }
-
-        .hero .subhead {
-            font-size: 1.25rem;
-            color: #c7b9a0;
-            letter-spacing: 8px;
-            font-weight: 300;
-            border-top: 1px solid rgba(255, 215, 0, 0.2);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        .cover-bottom-info .highlight-tag {
+            background: var(--red);
+            color: white;
+            padding: 2px 8px;
+            font-size: 0.55rem;
+        }
+        .cover-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 6%;
+            z-index: 3;
+        }
+        .cover-title-block .pre-tag {
             display: inline-block;
-            padding: 12px 28px;
-            backdrop-filter: blur(2px);
-            margin-top: 10px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: var(--red);
+            border: 2px solid var(--red);
+            padding: 4px 10px;
+            margin-bottom: 12px;
+            animation: preTagPulse 2s infinite;
+        }
+        @keyframes preTagPulse {
+            0%,
+            100% {
+                border-color: var(--red);
+                color: var(--red);
+            }
+            50% {
+                border-color: var(--black);
+                color: var(--black);
+            }
+        }
+        .cover-title-block h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            line-height: 0.95;
+            letter-spacing: -0.04em;
+            animation: titleGlitch 5s infinite;
+        }
+        @keyframes titleGlitch {
+            0%,
+            100% {
+                transform: translate(0);
+            }
+            1% {
+                transform: translate(-3px, 2px);
+            }
+            2% {
+                transform: translate(3px, -2px);
+            }
+            3% {
+                transform: translate(0);
+            }
+        }
+        .cover-title-block h1 .accent-word {
+            display: block;
+            color: var(--white);
+            background: var(--red);
+            padding: 0 12px;
+            width: fit-content;
+            margin-top: 4px;
+            animation: accentPop 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55) both;
+        }
+        @keyframes accentPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.15);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .cover-subtitle {
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: #333;
+            margin-top: 14px;
+            border-left: 4px solid var(--red);
+            padding-left: 14px;
+            line-height: 1.5;
+            z-index: 4;
+        }
+        .cover-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 28px;
+            z-index: 4;
+        }
+        .swiss-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .swiss-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: var(--red);
+            border-bottom: 2px solid var(--black);
+            padding-bottom: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            align-self: flex-start;
+        }
+        .swiss-heading {
+            font-size: 2.1rem;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--black);
             text-transform: uppercase;
         }
-
-        .hero .date-badge {
+        .swiss-heading .accent {
+            color: var(--white);
+            background: var(--red);
+            padding: 0 6px;
             display: inline-block;
-            background: rgba(255, 215, 0, 0.08);
-            border: 1px solid rgba(255, 210, 0, 0.25);
-            padding: 8px 24px;
-            border-radius: 40px;
-            margin-top: 24px;
-            font-size: 1rem;
-            color: #f0d69b;
-            letter-spacing: 2px;
-            backdrop-filter: blur(4px);
         }
-
-        /* 活动亮点网格 */
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 28px;
-            margin: 45px 0;
-        }
-
-        .feature-card {
-            background: rgba(22, 20, 28, 0.7);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 220, 100, 0.12);
-            border-radius: 24px;
-            padding: 30px 20px 24px;
-            transition: all 0.25s ease;
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
-            text-align: center;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(255, 200, 50, 0.4);
-            box-shadow: 0 20px 35px rgba(255, 200, 0, 0.1);
-        }
-
-        .feature-card .icon {
-            font-size: 3.2rem;
-            margin-bottom: 14px;
-            filter: drop-shadow(0 0 8px #ffb34755);
-        }
-
-        .feature-card h3 {
-            font-size: 1.3rem;
-            font-weight: 500;
-            color: #ffd966;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            color: #cbc2d4;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            max-width: 260px;
-            margin: 0 auto;
-        }
-
-        /* 介绍段落 + 署名特别位置 */
-        .intro-section {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(10, 8, 18, 0.6);
-            backdrop-filter: blur(4px);
-            border-radius: 48px;
-            padding: 40px 35px;
-            margin: 50px 0 20px;
-            border: 1px solid rgba(255, 180, 50, 0.08);
-            gap: 30px;
-        }
-
-        .intro-text {
-            flex: 2;
-            min-width: 260px;
-        }
-
-        .intro-text h2 {
-            font-size: 1.9rem;
-            font-weight: 500;
-            color: #f5d371;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .intro-text p {
-            font-size: 1.05rem;
-            color: #dbd1e6;
-            max-width: 600px;
+        .swiss-text {
+            font-size: 0.9rem;
             line-height: 1.7;
-            margin-bottom: 16px;
+            color: #1a1a1a;
         }
-
-        .intro-text .highlight {
-            color: #f8c150;
-            font-weight: 400;
-            background: rgba(255, 200, 0, 0.06);
-            padding: 2px 10px;
-            border-radius: 20px;
+        .swiss-text strong {
+            font-weight: 700;
+            background: var(--red-bg);
+            padding: 0 3px;
         }
-
-        .intro-signature {
-            flex: 1;
-            min-width: 200px;
-            text-align: right;
-            padding: 8px 0;
-            border-left: 1px solid rgba(255, 215, 0, 0.2);
-            padding-left: 30px;
+        .swiss-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 14px 28px;
+            background: var(--red);
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: 2px solid var(--black);
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--black);
+            transition: all 0.1s;
         }
-
-        .intro-signature .school {
-            font-size: 1.5rem;
-            font-weight: 600;
-            background: linear-gradient(to right, #f7d875, #e8b44f);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            line-height: 1.3;
-            letter-spacing: 2px;
+        .swiss-btn:active {
+            background: var(--black);
+            color: white;
+            box-shadow: 0 0 0 var(--black);
+            transform: translate(3px, 3px);
         }
-
-        .intro-signature .dept {
+        .swiss-btn--outline {
+            background: white;
+            color: var(--black);
+            border: 2px solid var(--black);
+            box-shadow: 4px 4px 0 var(--black);
+        }
+        .swiss-btn--ghost {
+            background: transparent;
+            color: var(--black);
+            border: 2px solid var(--black);
+            box-shadow: 4px 4px 0 var(--black);
+            padding: 14px 20px;
             font-size: 1rem;
-            color: #c0b0a0;
-            letter-spacing: 4px;
-            margin-top: 12px;
-            display: block;
-            border-top: 1px dashed rgba(255, 215, 0, 0.2);
-            padding-top: 14px;
         }
-
-        .intro-signature .badge-idea {
-            display: inline-block;
-            background: #1f1b28;
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            color: #ccb27b;
-            margin-top: 10px;
-            border: 1px solid #3a2f1f;
-        }
-
-        /* 影像风格引用块 */
-        .quote-block {
-            font-size: 1.35rem;
-            font-style: italic;
-            color: #dac9ae;
-            border-left: 4px solid #f5b342;
-            padding: 22px 30px;
-            margin: 40px 0 30px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 0 30px 30px 0;
-            max-width: 800px;
-        }
-
-        .quote-block span {
-            display: block;
-            margin-top: 12px;
-            font-style: normal;
-            font-size: 0.9rem;
-            color: #a79276;
-            letter-spacing: 2px;
-        }
-
-        /* 活动流程/时间轴 (简约) */
-        .timeline-title {
-            font-size: 1.6rem;
-            margin: 60px 0 30px;
-            font-weight: 400;
-            color: #f5d371;
-            text-align: center;
-            letter-spacing: 3px;
-        }
-
-        .timeline {
+        .data-flex {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px 30px;
-            margin-bottom: 50px;
+            gap: 8px;
         }
-
-        .timeline-item {
-            background: rgba(22, 18, 30, 0.5);
-            backdrop-filter: blur(3px);
-            border: 1px solid rgba(255, 200, 80, 0.1);
-            padding: 18px 28px;
-            border-radius: 60px;
+        .data-item {
+            flex: 1 1 28%;
+            min-width: 80px;
+            border: 2px solid var(--black);
+            padding: 14px 8px;
+            text-align: center;
+            background: white;
+        }
+        .data-number {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: var(--red);
+        }
+        .bar {
+            width: 50px;
+            border: 2px solid var(--black);
+            height: 20px;
+            background: var(--gray-400);
+            transition: height 0.6s;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 6px;
+            font-weight: 700;
+            color: white;
+        }
+        .bar.animated-before {
+            height: 116px;
+            background: var(--gray-600);
+        }
+        .bar.animated-after {
+            height: 186px;
+            background: var(--red);
+        }
+        .card-scroll {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 8px;
+            width: 100%;
+            scrollbar-width: none;
+        }
+        .scene-card {
+            min-width: 75%;
+            scroll-snap-align: start;
+            border: 2px solid var(--black);
+            padding: 20px;
+            background: white;
+        }
+        .flow-node {
+            position: relative;
+            cursor: pointer;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--gray-200);
+        }
+        .flow-node::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 14px;
+            width: 10px;
+            height: 10px;
+            background: var(--red);
+            border: 2px solid var(--black);
+        }
+        .flow-node.active::before {
+            background: var(--black);
+            transform: scale(1.4);
+        }
+        .flow-detail {
+            display: none;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            color: var(--gray-600);
+        }
+        .flow-node.active .flow-detail {
+            display: block;
+        }
+        .case-card {
+            border: 2px solid var(--black);
+            padding: 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            background: white;
+        }
+        .case-card.expanded {
+            border-color: var(--red);
+            border-left-width: 6px;
+        }
+        .case-detail {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s;
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+        .case-card.expanded .case-detail {
+            max-height: 160px;
+            margin-top: 10px;
+        }
+        .quiz-step {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .progress-bar-outer {
+            width: 100%;
+            height: 6px;
+            background: var(--gray-100);
+            border: 1px solid var(--black);
+        }
+        .progress-bar-inner {
+            height: 100%;
+            background: var(--red);
+            transition: width 0.3s;
+        }
+        .quiz-question-text {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--black);
+            line-height: 1.5;
+            min-height: 48px;
+        }
+        .quiz-options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .quiz-option-btn {
+            border: 2px solid var(--black);
+            padding: 13px 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: white;
+            text-align: left;
+            transition: all 0.15s;
+            letter-spacing: 0.02em;
+        }
+        .quiz-option-btn:active {
+            background: var(--red-bg);
+            border-color: var(--red);
+            transform: translateX(4px);
+        }
+        .quiz-result-panel {
+            text-align: center;
+            padding: 24px;
+            border: 3px solid var(--black);
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 56px;
+            margin: 20px 0 8px;
+            background: var(--gray-100);
+            border: 2px solid var(--black);
+        }
+        .slider-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 50%;
+            background: var(--red);
+        }
+        .slider-thumb {
+            position: absolute;
+            top: -10px;
+            width: 34px;
+            height: 76px;
+            background: var(--white);
+            border: 3px solid var(--black);
+            left: calc(50% - 17px);
+            cursor: grab;
             display: flex;
             align-items: center;
-            gap: 16px;
-            flex: 0 1 auto;
-            transition: 0.2s;
+            justify-content: center;
+            font-weight: 900;
+            color: var(--red);
         }
-
-        .timeline-item:hover {
-            background: rgba(40, 30, 20, 0.6);
-            border-color: #f5b34255;
+        .nav-dot {
+            width: 5px;
+            height: 5px;
+            background: #ccc;
+            transition: 0.3s;
         }
-
-        .timeline-item .time {
-            font-weight: 600;
-            color: #ffd966;
-            background: #1e1828;
-            padding: 2px 14px;
-            border-radius: 40px;
+        .nav-dot.active {
+            background: var(--red);
+            width: 7px;
+            height: 7px;
+        }
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--black);
+            color: white;
+            padding: 14px 28px;
+            border: 2px solid var(--red);
+            font-weight: 700;
+            z-index: 999;
+            opacity: 0;
+            transition: 0.3s;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+        .icon-svg {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        /* 区域数据专属样式 */
+        .region-bar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .region-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .region-bar-label {
+            width: 90px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .region-bar-track {
+            flex: 1;
+            height: 28px;
+            background: var(--gray-100);
+            border: 2px solid var(--black);
+            position: relative;
+        }
+        .region-bar-fill {
+            height: 100%;
+            background: var(--red);
+            width: 0%;
+            transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .region-bar-value {
+            width: 50px;
+            font-weight: 900;
             font-size: 0.9rem;
-            letter-spacing: 1px;
+            color: var(--red);
+            text-align: left;
         }
-
-        .timeline-item .desc {
-            color: #e6d7c2;
-            font-size: 1rem;
-        }
-
-        /* 号召与按钮 */
-        .cta-area {
-            text-align: center;
-            padding: 50px 20px 60px;
-        }
-
-        .cta-button {
-            display: inline-block;
-            background: linear-gradient(135deg, #f5b342 0%, #f09a2e 100%);
-            border: none;
-            padding: 18px 56px;
-            border-radius: 60px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #0d0b12;
-            letter-spacing: 4px;
-            box-shadow: 0 10px 30px rgba(255, 200, 0, 0.2);
-            transition: all 0.2s;
-            cursor: default;
-            text-decoration: none;
-            border: 1px solid rgba(255, 220, 100, 0.3);
-        }
-
-        .cta-button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 15px 40px rgba(255, 200, 0, 0.4);
-            background: linear-gradient(135deg, #f7c05c, #ec9f30);
-        }
-
-        .cta-button:active {
-            transform: scale(0.98);
-        }
-
-        .cta-hint {
-            margin-top: 18px;
-            color: #a58e70;
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-        }
-
-        /* 页脚署名 (醒目) */
-        .footer-signature {
-            margin-top: 50px;
-            padding: 36px 20px 40px;
-            border-top: 1px solid rgba(255, 215, 0, 0.10);
-            text-align: center;
-        }
-
-        .footer-signature .main-credit {
-            font-size: 1.8rem;
-            font-weight: 600;
-            background: linear-gradient(to right, #f2cf7a, #e2b45c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: 4px;
-            display: inline-block;
-            margin-bottom: 6px;
-        }
-
-        .footer-signature .sub-credit {
-            font-size: 1rem;
-            color: #b6a386;
-            letter-spacing: 6px;
-            border-top: 1px dashed rgba(255, 200, 50, 0.15);
-            padding-top: 16px;
-            display: inline-block;
-        }
-
-        .footer-signature .sub-credit i {
-            font-style: normal;
-            background: rgba(255, 200, 0, 0.05);
-            padding: 0 12px;
-        }
-
-        .footer-note {
-            color: #6b5d4a;
-            font-size: 0.8rem;
-            margin-top: 25px;
-            letter-spacing: 1px;
-        }
-
-        /* 响应式修正 */
-        @media (max-width: 700px) {
-            .hero h1 {
-                letter-spacing: 2px;
-            }
-            .intro-section {
-                flex-direction: column;
-                text-align: center;
-                padding: 30px 20px;
-            }
-            .intro-signature {
-                text-align: center;
-                border-left: none;
-                padding-left: 0;
-                border-top: 1px solid rgba(255, 215, 0, 0.2);
-                padding-top: 20px;
-                width: 100%;
-            }
-            .timeline-item {
-                flex: 1 1 100%;
-                justify-content: center;
-            }
-            .feature-grid {
-                gap: 20px;
-            }
+        .region-card {
+            border: 2px solid var(--black);
+            padding: 16px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
     </style>
 </head>
 <body>
-    <div class="site-wrapper">
-        <div class="content">
-            <!-- HERO 主视觉 -->
-            <div class="hero">
-                <h1>微短剧之夜</h1>
-                <div class="subhead">郑州 · 星光剧场</div>
-                <div class="date-badge">📅 2025年5月24日 · 19:30</div>
-            </div>
-
-            <!-- 介绍 + 署名核心区 (呼应郑州工程技术学院微短剧学院) -->
-            <div class="intro-section">
-                <div class="intro-text">
-                    <h2>✨ 新锐视界 · 中原发声</h2>
-                    <p>
-                        郑州，黄河之畔的戏剧新热土。<span class="highlight">「微短剧之夜」</span> 
-                        汇聚先锋创作者、资深影视人与热情观众，用紧凑的镜头语言讲述当代故事。
-                        从城市记忆到未来幻想，每部作品都在 <strong>10分钟</strong> 内引爆情感。
-                    </p>
-                    <p>
-                        本次展映由<strong>郑州工程技术学院微短剧学院</strong>策展制作，青年力量点燃影像之火。
-                    </p>
+    <div class="h5-container" id="h5Container">
+        <canvas class="particle-canvas" id="particleCanvas"></canvas>
+        <div class="grid-bg"></div>
+        <div class="screens-stack" id="screensStack">
+            <!-- 0 封面 -->
+            <div class="screen active" data-index="0" style="overflow:hidden;">
+                <div class="cover-top-bar"></div><div class="cover-top-strip"></div><div class="scan-line"></div><div class="scan-line"></div>
+                <div class="cover-geo-large"></div><div class="cover-geo-small"></div><div class="cover-diamond"></div>
+                <div class="cover-rings"><div class="cover-ring"></div><div class="cover-ring"></div></div>
+                <div class="cover-dot-matrix"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                <div class="cover-wrapper">
+                    <div class="cover-title-block"><div class="pre-tag">广告调查课时作业</div><h1>当AI<span class="accent-word">走进</span>校园</h1></div>
+                    <p class="cover-subtitle"><svg class="icon-svg" viewBox="0 0 24 24" width="22" height="22" style="vertical-align:middle;margin-right:4px;"><rect x="2" y="2" width="20" height="20" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="10" r="1.5" fill="currentColor"/><circle cx="15" cy="10" r="1.5" fill="currentColor"/><path d="M8 14c0 0 1.5 2 4 2s4-2 4-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>人工智能如何改变<br>我们的学生活动</p>
+                    <div class="cover-actions"><button class="swiss-btn" id="btnStart"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polygon points="5,3 19,12 5,21"/></svg>开始探索</button><button class="swiss-btn swiss-btn--ghost" id="btnQuickInfo">?</button></div>
                 </div>
-                <div class="intro-signature">
-                    <div class="school">郑州工程技术学院</div>
-                    <div class="dept">微短剧学院 制作</div>
-                    <div class="badge-idea">🎥 影像·创新·表达</div>
-                </div>
+                <div class="cover-bottom-info"><span>ZZUT</span><span class="highlight-tag">SEC-Hand</span><span>秒针小组</span></div>
             </div>
-
-            <!-- 亮点卡片网格 (展现活动精彩) -->
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="icon">🎞️</div>
-                    <h3>10部竞赛短片</h3>
-                    <p>从近百部投递中精选，涵盖剧情、悬疑、实验、动画。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🎬</div>
-                    <h3>导演面对面</h3>
-                    <p>映后交流环节，直接对话年轻创作团队。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🏆</div>
-                    <h3>现场观众奖</h3>
-                    <p>投出你的「最佳短剧」，参与即有机会获得周边礼包。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">🌃</div>
-                    <h3>郑州城市单元</h3>
-                    <p>特别策划“商都记忆”主题短片，感受中原光影。</p>
-                </div>
-            </div>
-
-            <!-- 引用块增加氛围 -->
-            <div class="quote-block">
-                “短，却不止于短 —— 每一帧都是浓缩的力量。”
-                <span>—— 微短剧之夜 · 策展语</span>
-            </div>
-
-            <!-- 时间轴/流程 -->
-            <h3 class="timeline-title">⏳ 当晚流程</h3>
-            <div class="timeline">
-                <div class="timeline-item"><span class="time">19:00</span><span class="desc">签到 · 红毯</span></div>
-                <div class="timeline-item"><span class="time">19:30</span><span class="desc">开幕 · 引言</span></div>
-                <div class="timeline-item"><span class="time">19:50</span><span class="desc">上半场展映 (5部)</span></div>
-                <div class="timeline-item"><span class="time">20:40</span><span class="desc">中场交流</span></div>
-                <div class="timeline-item"><span class="time">21:00</span><span class="desc">下半场展映 (5部)</span></div>
-                <div class="timeline-item"><span class="time">21:50</span><span class="desc">颁奖 & 闭幕</span></div>
-            </div>
-
-            <!-- 号召区域 (装饰性行动按钮) -->
-            <div class="cta-area">
-                <div class="cta-button">🎟️ 预约观摩</div>
-                <div class="cta-hint">免费入场 · 座位有限 · 郑州· 郑东新区文化馆</div>
-            </div>
-
-            <!-- 页脚署名，再次强调学院制作 -->
-            <div class="footer-signature">
-                <div class="main-credit">郑州工程技术学院 · 微短剧学院</div>
-                <div class="sub-credit"><i>✧</i> 微短剧之夜 · 制作出品 <i>✧</i></div>
-                <div class="footer-note">© 2025 郑州工程技术学院微短剧学院 | 影像让城市发光</div>
-            </div>
+            <!-- 1 引入 -->
+            <div class="screen" data-index="1"><div class="swiss-section" style="padding-top:40px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>数据洞察</span><h2 class="swiss-heading">AI已来，<span class="accent">你感受到了吗？</span></h2><div class="data-flex"><div class="data-item"><div class="data-number" id="num1">0亿</div><div style="font-size:0.65rem;font-weight:600;">AI用户规模</div></div><div class="data-item"><div class="data-number" id="num2">0%</div><div style="font-size:0.65rem;font-weight:600;">19岁以下占比</div></div><div class="data-item"><div class="data-number" id="num3">0+</div><div style="font-size:0.65rem;font-weight:600;">接入学校数</div></div></div><div style="border:2px solid var(--black);padding:14px;background:var(--gray-50);"><p class="swiss-text" style="font-size:0.85rem;margin:0;"><strong>"十五五"规划</strong>明确提出：促进人工智能助力教育模式变革</p></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"><div style="border:2px solid var(--black);padding:12px 6px;text-align:center;font-size:0.7rem;font-weight:600;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg><br>体育课</div><div style="border:2px solid var(--black);padding:12px 6px;text-align:center;font-size:0.7rem;font-weight:600;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M16 16l-4-4-4 4"/></svg><br>社团活动</div><div style="border:2px solid var(--black);padding:12px 6px;text-align:center;font-size:0.7rem;font-weight:600;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><br>课堂学习</div><div style="border:2px solid var(--black);padding:12px 6px;text-align:center;font-size:0.7rem;font-weight:600;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg><br>春游实践</div><div style="border:2px solid var(--black);padding:12px 6px;text-align:center;font-size:0.7rem;font-weight:600;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><br>作业辅导</div><div style="border:2px solid var(--black);padding:12px 6px;text-align:center;font-size:0.7rem;font-weight:600;"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg><br>升学规划</div></div></div></div>
+            <!-- 2 学习 -->
+            <div class="screen" data-index="2"><div class="swiss-section" style="padding-top:44px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>学习</span><h2 class="swiss-heading">AI<span class="accent">更懂你</span></h2><div id="chartSwiss" style="display:flex;align-items:flex-end;justify-content:space-around;height:220px;border-bottom:3px solid var(--black);margin-top:10px;"><div><div class="bar animated-before" id="barOld">58%</div><div style="font-weight:700;margin-top:4px;">之前</div></div><div><div class="bar animated-after" id="barNew">93%</div><div style="font-weight:700;margin-top:4px;">AI辅助</div></div></div><p class="swiss-text" style="text-align:center;">课后任务完成率 <strong>58% → 93%</strong></p></div></div>
+            <!-- 3 活动 -->
+            <div class="screen" data-index="3"><div class="swiss-section" style="padding-top:44px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>文化</span><h2 class="swiss-heading">活动<span class="accent">更有趣</span></h2><div class="card-scroll"><div class="scene-card"><strong>AI绘画设计文化墙</strong><br><small>用AI生成校园视觉方案</small></div><div class="scene-card"><strong>AI制作海报与视频</strong><br><small>智能生成宣传物料</small></div><div class="scene-card"><strong>AI春游跨学科实践</strong><br><small>识别动植物·创作图文</small></div></div><p class="swiss-text">AI让"个性化培育"成为可能，学生成为校园文化的<strong>共建者</strong>。</p></div></div>
+            <!-- 4 社团 -->
+            <div class="screen" data-index="4"><div class="swiss-section" style="padding-top:44px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2v4M12 14v8"/></svg>社团</span><h2 class="swiss-heading">AI让社团<span class="accent">更能</span></h2><div style="border-left:3px solid var(--black);padding-left:20px;display:flex;flex-direction:column;gap:2px;"><div class="flow-node"><div class="flow-title">① 活动发想</div><div class="flow-detail">DeepSeek等生成多种方案灵感</div></div><div class="flow-node"><div class="flow-title">② 方案撰稿</div><div class="flow-detail">AI辅助撰写策划书与宣传文案</div></div><div class="flow-node"><div class="flow-title">③ 视觉设计</div><div class="flow-detail">Canva智能设计海报</div></div><div class="flow-node"><div class="flow-title">④ 数据分析</div><div class="flow-detail">Python自动化处理调研数据</div></div></div></div></div>
+            <!-- 5 案例 -->
+            <div class="screen" data-index="5"><div class="swiss-section" style="padding-top:44px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>实践</span><h2 class="swiss-heading">真实<span class="accent">案例</span></h2><div class="case-card"><strong>成都实验小学"AI春游"</strong><div class="case-detail">学生借助AI识别动植物，社会实践变成跨学科AI课堂。</div></div><div class="case-card"><strong>成都二中"语文xAI"选修课</strong><div class="case-detail">与狄更斯AI智能体对话，将《鸿门宴》改编为剧本杀。</div></div><div class="case-card"><strong>AI体育课</strong><div class="case-detail">立定跳远后屏幕实时显示腾空高度、起跳角度，AI逐帧回放指导。</div></div></div></div>
+            <!-- 6 双刃剑 -->
+            <div class="screen" data-index="6"><div class="swiss-section" style="padding-top:44px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>思考</span><h2 class="swiss-heading">AI是<span class="accent">双刃剑</span></h2><div class="slider-container" id="sliderContainer"><div class="slider-track" id="sliderTrack"></div><div class="slider-thumb" id="sliderThumb">⇋</div></div><div style="display:flex;justify-content:space-between;font-weight:700;font-size:0.75rem;"><span>积极面</span><span>挑战面</span></div><div id="balanceText" class="swiss-text" style="margin-top:16px;"><strong>积极面：</strong>62.6%家长感到孩子知识面拓展。</div></div></div>
+            <!-- 7 问卷 -->
+            <div class="screen" data-index="7"><div class="swiss-section" style="padding-top:40px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>互动测试</span><h2 class="swiss-heading" style="font-size:1.8rem;">AI接受度<span class="accent">测试</span></h2><div id="quizArea"></div></div></div>
+            <!-- 8 新增：郑州北大学城调查导言 -->
+            <div class="screen" data-index="8"><div class="swiss-section" style="padding-top:40px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>区域调研</span><h2 class="swiss-heading">郑州<span class="accent">北大学城</span></h2><p class="swiss-text">我们对郑州北大学城周边多所高校进行了<strong>AI接受度问卷调查</strong>，覆盖<span style="font-weight:700;color:var(--red);">郑州师范学院、郑州财经学院、河南牧业经济学院</span>等院校，回收有效问卷<strong>1,200+</strong>份。</p><div class="region-card"><strong>核心发现</strong><p class="swiss-text" style="font-size:0.85rem;">该区域大学生AI接受度平均得分<strong style="color:var(--red);">41.2/50</strong>，显著高于全国大学生平均水平（35.6/50），整体呈现<span style="background:var(--red-bg);">积极拥抱型</span>特征。</p></div></div></div>
+            <!-- 9 新增：各校接受度对比图 -->
+            <div class="screen" data-index="9"><div class="swiss-section" style="padding-top:40px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>数据对比</span><h2 class="swiss-heading" style="font-size:1.8rem;">各校<span class="accent">接受度</span></h2><div class="region-bar-group" id="regionBars"><div class="region-bar-row"><span class="region-bar-label">郑州师范学院</span><div class="region-bar-track"><div class="region-bar-fill" data-width="85"></div></div><span class="region-bar-value">42.5</span></div><div class="region-bar-row"><span class="region-bar-label">郑州财经学院</span><div class="region-bar-track"><div class="region-bar-fill" data-width="80"></div></div><span class="region-bar-value">40.0</span></div><div class="region-bar-row"><span class="region-bar-label">河南牧业经济学院</span><div class="region-bar-track"><div class="region-bar-fill" data-width="82"></div></div><span class="region-bar-value">41.0</span></div><div class="region-bar-row"><span class="region-bar-label">全国平均</span><div class="region-bar-track"><div class="region-bar-fill" data-width="71"></div></div><span class="region-bar-value">35.6</span></div></div><p class="swiss-text" style="font-size:0.75rem;color:var(--gray-400);text-align:center;">*数据来源：2026年郑州北大学城AI认知调研</p></div></div>
+            <!-- 10 新增：原因分析与总结 -->
+            <div class="screen" data-index="10"><div class="swiss-section" style="padding-top:40px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>分析</span><h2 class="swiss-heading" style="font-size:1.6rem;">接受度<span class="accent">较高</span>的原因</h2><div class="region-card"><strong>1. 专业设置贴近技术应用</strong><p class="swiss-text" style="font-size:0.8rem;">北大学城院校以师范、财经、应用技术为主，学生普遍接触AI工具较早。</p></div><div class="region-card"><strong>2. 校园数字化建设领先</strong><p class="swiss-text" style="font-size:0.8rem;">该区域高校已部署智慧教室、AI学习平台，学生使用AI辅助学习已成常态。</p></div><div class="region-card"><strong>3. 学生创新氛围浓厚</strong><p class="swiss-text" style="font-size:0.8rem;">各类AI社团、竞赛活跃，学生主动探索AI应用场景。</p></div><p class="swiss-text" style="margin-top:8px;"><strong>结论：</strong>郑州北大学城大学生对AI的接受度处于全国前列，是AI教育推广的<strong>积极示范区域</strong>。</p></div></div>
+            <!-- 11 结语 -->
+            <div class="screen" data-index="11"><div class="swiss-section" style="align-items:center;justify-content:center;text-align:center;padding-top:44px;"><span class="swiss-label"><svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>结语</span><div style="width:64px;height:64px;margin:0 auto;display:flex;align-items:center;justify-content:center;border:3px solid var(--black);border-radius:50%;"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div><h2 class="swiss-heading" style="font-size:2rem;">拥抱AI<span class="accent">不被定义</span></h2><p class="swiss-text">"人工智能要为教育赋能，教育则要为人工智能赋魂。"</p><button class="swiss-btn swiss-btn--outline" id="btnShare" style="margin-top:16px;">分享</button></div></div>
+            <!-- 12 封底 -->
+            <div class="screen" data-index="12" style="background:var(--black);color:white;justify-content:center;text-align:center;padding-top:30%;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="margin-bottom:16px;"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg><p style="font-weight:900;font-size:1.4rem;">当AI走进校园</p><p style="opacity:0.5;">制作团队 · 2026</p><button class="swiss-btn" id="btnRestart" style="background:white;color:var(--black);border-color:white;margin-top:20px;">再看一次</button></div>
         </div>
+        <div id="navDots" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:99;"></div>
+        <div class="toast" id="toast"></div>
     </div>
-
-    <!-- 极简交互：控制台提示 (无侵入) -->
     <script>
         (function() {
-            // 仅用于增加页面动态感：控制台展示署名，无实际功能干扰
-            console.log("🎬 郑州微短剧之夜 · 由郑州工程技术学院微短剧学院制作");
-            console.log("✨ 光影青春，影像中原");
-            // 页面加载后增加一个动态点缀 - 让年份自动更新 (无侵入)
-            const dateBadge = document.querySelector('.date-badge');
-            if (dateBadge) {
-                // 但保留现有文案，仅做装饰：不修改实际内容
-                // 只是让控制台安静提示
+            const container = document.getElementById('h5Container');
+            const screens = Array.from(document.querySelectorAll('.screen'));
+            const total = screens.length;
+            const navDots = document.getElementById('navDots');
+            const toast = document.getElementById('toast');
+            let current = 0, isTransitioning = false, touchStartY = 0, touchStartTime = 0;
+            let chartAnimated = true;
+
+            for (let i = 0; i < total; i++) {
+                const d = document.createElement('div');
+                d.className = 'nav-dot';
+                d.dataset.idx = i;
+                navDots.appendChild(d);
             }
-            // 可增加卡片微动效 (纯视觉)
-            const cards = document.querySelectorAll('.feature-card');
-            cards.forEach((card, index) => {
-                card.style.setProperty('--delay', index * 0.1 + 's');
-                // 轻微视差效果
-            });
+            function updateNav() { [...navDots.children].forEach((d, i) => d.classList.toggle('active', i === current)); }
+
+            function goTo(index, direction = 'forward') {
+                if (isTransitioning || index < 0 || index >= total || index === current) return;
+                isTransitioning = true;
+                const oldS = screens[current], newS = screens[index];
+                if (direction === 'forward') { oldS.classList.add('leave-forward'); newS.classList.add('enter-forward'); }
+                else { oldS.classList.add('leave-backward'); newS.classList.add('enter-backward'); }
+                void newS.offsetWidth;
+                oldS.classList.remove('active'); newS.classList.add('active');
+                const onEnd = (e) => {
+                    if (e.target !== oldS && e.target !== newS) return;
+                    if (e.target === oldS) { oldS.classList.remove('leave-forward', 'leave-backward'); oldS.removeEventListener('transitionend', onEnd); }
+                    if (e.target === newS) { newS.classList.remove('enter-forward', 'enter-backward'); newS.removeEventListener('transitionend', onEnd);
+                        current = index; updateNav(); isTransitioning = false;
+                        if (current === 1) animateNumbers();
+                        if (current === 2 && !chartAnimated) setTimeout(() => animateChart(true), 350);
+                        if (current === 7) initQuiz();
+                        if (current === 9) animateRegionBars();
+                        if (current !== 2) chartAnimated = true;
+                    }
+                };
+                oldS.addEventListener('transitionend', onEnd);
+                newS.addEventListener('transitionend', onEnd);
+            }
+            function next() { goTo(current + 1); }
+            function prev() { goTo(current - 1); }
+
+            container.addEventListener('touchstart', e => { if (isTransitioning) return; touchStartY = e.touches[0].clientY; touchStartTime = Date.now(); }, { passive: true });
+            container.addEventListener('touchend', e => { if (isTransitioning) return; const dy = e.changedTouches[0].clientY - touchStartY; if (Math.abs(dy) > 30 && Date.now() - touchStartTime < 700) dy < -20 ? next() : prev(); });
+            let wt;
+            container.addEventListener('wheel', e => { if (isTransitioning) return; e.preventDefault(); if (wt) return; wt = setTimeout(() => wt = null, 700); e.deltaY > 15 ? next() : prev(); }, { passive: false });
+            document.addEventListener('keydown', e => { if (e.key === 'ArrowDown') { e.preventDefault(); next(); } if (e.key === 'ArrowUp') { e.preventDefault(); prev(); } });
+
+            document.getElementById('btnStart').addEventListener('click', () => goTo(1));
+            document.getElementById('btnQuickInfo').addEventListener('click', () => showToast('本H5由秒针SEC-Hand制作'));
+            document.getElementById('btnRestart').addEventListener('click', () => { chartAnimated = true; resetChart(); screens.forEach(s => s.classList.remove('active', 'leave-forward', 'leave-backward', 'enter-forward', 'enter-backward')); screens[0].classList.add('active'); current = 0; updateNav(); chartAnimated = false; });
+            document.getElementById('btnShare').addEventListener('click', () => showToast('已复制分享链接'));
+
+            function showToast(m) { clearTimeout(tt); toast.textContent = m; toast.classList.add('show'); tt = setTimeout(() => toast.classList.remove('show'), 1800); }
+            let tt;
+
+            // 粒子
+            const canvas = document.getElementById('particleCanvas'), ctx = canvas.getContext('2d'); let ps = [];
+            function rc() { canvas.width = container.offsetWidth; canvas.height = container.offsetHeight; }
+            window.addEventListener('resize', rc); rc();
+            class P { constructor(){ this.reset(); } reset(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.vx=(Math.random()-0.5)*0.4; this.vy=(Math.random()-0.5)*0.4; this.s=Math.random()*1.8+0.6; this.o=Math.random()*0.3+0.08; } u(){ this.x+=this.vx; this.y+=this.vy; if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset(); } d(){ ctx.fillStyle=`rgba(230,0,18,${this.o})`; ctx.beginPath(); ctx.arc(this.x,this.y,this.s,0,Math.PI*2); ctx.fill(); } }
+            for (let i=0;i<30;i++) ps.push(new P());
+            function ap(){ ctx.clearRect(0,0,canvas.width,canvas.height); ps.forEach(p=>{p.u();p.d();}); requestAnimationFrame(ap); } ap();
+
+            function animateNumbers(){ av('num1',0,6,'亿'); av('num2',0,26.4,'%'); av('num3',0,2800,'+'); }
+            function av(id,f,t,s){ const el=document.getElementById(id); if(!el) return; const d=1600,st=performance.now(); function up(now){ const p=Math.min((now-st)/d,1); el.textContent=(f+(t-f)*(1-Math.pow(1-p,3))).toFixed(1)+s; if(p<1) requestAnimationFrame(up); } requestAnimationFrame(up); }
+
+            function animateChart(r=false){ chartAnimated=true; const o=document.getElementById('barOld'),n=document.getElementById('barNew'); if(r){ o.classList.remove('animated-before'); n.classList.remove('animated-after'); void o.offsetWidth; o.classList.add('animated-before'); n.classList.add('animated-after'); } }
+            function resetChart(){ document.getElementById('barOld').classList.remove('animated-before'); document.getElementById('barNew').classList.remove('animated-after'); }
+            document.getElementById('chartSwiss').addEventListener('click', ()=>{ if(current===2){ resetChart(); setTimeout(()=>animateChart(true),80); } });
+
+            document.querySelectorAll('.flow-node').forEach(n=>n.addEventListener('click',function(){ const w=this.classList.contains('active'); document.querySelectorAll('.flow-node').forEach(f=>f.classList.remove('active')); if(!w) this.classList.add('active'); }));
+            document.querySelectorAll('.case-card').forEach(c=>c.addEventListener('click',function(){ this.classList.toggle('expanded'); }));
+
+            const sc=document.getElementById('sliderContainer'),st=document.getElementById('sliderThumb'),sr=document.getElementById('sliderTrack'),bt=document.getElementById('balanceText');
+            let dragging=false;
+            function us(clientX){ const rect=sc.getBoundingClientRect(); let p=(clientX-rect.left)/rect.width; p=Math.max(0,Math.min(1,p)); st.style.left=`calc(${p*100}% - 17px)`; sr.style.width=`${p*100}%`; bt.innerHTML=p<0.5?'<strong>积极面：</strong>62.6%家长感到孩子知识面拓展，59.8%创造力被激发。':'<strong>挑战面：</strong>过度依赖AI可能导致元认知下降，注意力与社交能力受损。'; }
+            st.addEventListener('mousedown',e=>{dragging=true;e.preventDefault();}); st.addEventListener('touchstart',e=>{dragging=true;e.preventDefault();});
+            window.addEventListener('mousemove',e=>{if(dragging)us(e.clientX);}); window.addEventListener('touchmove',e=>{if(dragging)us(e.touches[0].clientX);},{passive:false});
+            window.addEventListener('mouseup',()=>dragging=false); window.addEventListener('touchend',()=>dragging=false);
+            sc.addEventListener('click',e=>us(e.clientX));
+
+            // 区域图表动画
+            function animateRegionBars(){
+                const fills = document.querySelectorAll('#regionBars .region-bar-fill');
+                fills.forEach(bar => {
+                    const w = bar.getAttribute('data-width');
+                    bar.style.width = w + '%';
+                });
+            }
+
+            // 问卷逻辑
+            const quizQuestions = [
+                { q: '1. 我了解人工智能的基本概念和应用场景。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '2. 我愿意在学习和生活中尝试使用AI工具。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '3. 我认为AI技术进入校园利大于弊。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '4. 我相信AI能够有效提高学习效率。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '5. 我担心AI会取代人类教师的工作。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '6. 我愿意相信AI给出的学习建议和反馈。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '7. 我认为学生应该主动学习如何使用AI工具。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '8. 我担心过度使用AI会影响独立思考能力。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '9. 我对AI技术未来的发展持乐观态度。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+                { q: '10. 我愿意向身边人推荐使用AI辅助学习。', opts: ['非常不同意', '不同意', '中立', '同意', '非常同意'] },
+            ];
+            let quizScores = []; let currentQ = 0; let quizDone = false;
+            function initQuiz(){ quizScores=[]; currentQ=0; quizDone=false; renderQuizStep(); }
+            function renderQuizStep(){
+                const area = document.getElementById('quizArea');
+                if(quizDone) return;
+                if(currentQ >= quizQuestions.length){ showQuizResult(); return; }
+                const q = quizQuestions[currentQ];
+                const pct = Math.round((currentQ/quizQuestions.length)*100);
+                area.innerHTML = `<div class="quiz-step"><div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%;"></div></div><p style="font-size:0.75rem;color:var(--gray-400);">第 ${currentQ+1} / ${quizQuestions.length} 题</p><p class="quiz-question-text">${q.q}</p><div class="quiz-options-grid">${q.opts.map((o,i)=>`<div class="quiz-option-btn" data-score="${i+1}">${o}</div>`).join('')}</div></div>`;
+                area.querySelectorAll('.quiz-option-btn').forEach(btn=>{ btn.addEventListener('click',function(){ quizScores.push(parseInt(this.dataset.score)); currentQ++; renderQuizStep(); }); });
+            }
+            function showQuizResult(){
+                quizDone=true; const totalScore = quizScores.reduce((a,b)=>a+b,0);
+                let level,desc,color;
+                if(totalScore<=20){ level='保守观望型'; desc='你对AI持谨慎态度，倾向于传统方式。建议多了解AI的实际应用案例，逐步建立信任。'; color='var(--gray-600)'; }
+                else if(totalScore<=30){ level='谨慎尝试型'; desc='你对AI有一定好奇但仍有顾虑，愿意在特定场景下尝试。保持开放心态，AI可以成为不错的辅助工具。'; color='var(--black)'; }
+                else if(totalScore<=40){ level='开放接纳型'; desc='你对AI持积极态度，认可其价值并愿意主动使用。你很可能已经在学习生活中受益于AI工具。'; color='var(--red)'; }
+                else { level='积极拥抱型'; desc='你是AI技术的坚定支持者，乐于探索新工具并分享给他人。请继续保持批判性思维，让AI为你所用。'; color='var(--red)'; }
+                document.getElementById('quizArea').innerHTML = `<div class="quiz-result-panel"><p style="font-size:0.8rem;color:var(--gray-400);">你的AI接受度得分</p><p style="font-size:3.5rem;font-weight:900;color:${color};line-height:1;">${totalScore}<span style="font-size:1rem;">/50</span></p><p style="font-weight:900;font-size:1.3rem;color:${color};">${level}</p><p class="swiss-text" style="margin-top:8px;">${desc}</p><button class="swiss-btn swiss-btn--outline" id="retryQuiz" style="margin-top:12px;">重新测试</button></div>`;
+                document.getElementById('retryQuiz').addEventListener('click', initQuiz);
+            }
+
+            updateNav(); screens[0].classList.add('active'); initQuiz(); chartAnimated=false;
         })();
     </script>
 </body>
